@@ -737,10 +737,7 @@ do
         },
         tries = (ctx.balancer_data or {}).tries,
         latencies = {
-          kong = (ctx.KONG_ACCESS_TIME or 0) +
-                 (ctx.KONG_RECEIVE_TIME or 0) +
-                 (ctx.KONG_REWRITE_TIME or 0) +
-                 (ctx.KONG_BALANCER_TIME or 0),
+          kong = ctx.KONG_PROXY_LATENCY or 0,
           proxy = ctx.KONG_WAITING_TIME or -1,
           request = var.request_time * 1000
         },
@@ -797,8 +794,7 @@ do
         },
         tries = (ctx.balancer_data or {}).tries,
         latencies = {
-          kong = (ctx.KONG_PREREAD_TIME or 0) +
-                 (ctx.KONG_BALANCER_TIME or 0),
+          kong = ctx.KONG_PROXY_LATENCY or 0,
           session = var.session_time * 1000,
         },
         authenticated_entity = authenticated_entity,
