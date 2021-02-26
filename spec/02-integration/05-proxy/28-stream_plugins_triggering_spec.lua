@@ -51,7 +51,6 @@ local phases_tls = {
 
 local function assert_phases(phrases)
   for phase, count in pairs(phrases) do
-    print(phase)
     assert(find_in_file(phase, count))
   end
 end
