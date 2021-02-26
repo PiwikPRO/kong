@@ -634,6 +634,24 @@ function Kong.init_worker()
 end
 
 
+function Kong.ssl_certificate()
+  kong_global.set_phase(kong, PHASES.certificate)
+
+  -- this doesn't really work across the phases currently (OpenResty 1.13.6.2),
+  -- but it returns a table (rewrite phase clears it)
+  local ctx = ngx.ctx
+  log_init_worker_errors(ctx)
+
+  -- this is the first phase to run on an HTTPS request
+  ctx.workspace = kong.default_workspace
+
+  runloop.certificate.before(ctx)
+  local plugins_iterator = runloop.get_updated_plugins_iterator()
+  execute_plugins_iterator(plugins_iterator, "certificate", ctx)
+  runloop.certificate.after(ctx)
+end
+
+
 function Kong.preread()
   local ctx = ngx.ctx
   if not ctx.KONG_PROCESSING_START then
@@ -668,24 +686,6 @@ function Kong.preread()
 
   -- we intent to proxy, though balancer may fail on that
   ctx.KONG_PROXIED = true
-end
-
-
-function Kong.ssl_certificate()
-  kong_global.set_phase(kong, PHASES.certificate)
-
-  -- this doesn't really work across the phases currently (OpenResty 1.13.6.2),
-  -- but it returns a table (rewrite phase clears it)
-  local ctx = ngx.ctx
-  log_init_worker_errors(ctx)
-
-  -- this is the first phase to run on an HTTPS request
-  ctx.workspace = kong.default_workspace
-
-  runloop.certificate.before(ctx)
-  local plugins_iterator = runloop.get_updated_plugins_iterator()
-  execute_plugins_iterator(plugins_iterator, "certificate", ctx)
-  runloop.certificate.after(ctx)
 end
 
 
